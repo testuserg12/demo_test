@@ -1,5 +1,8 @@
 package com.flipkart.testscript.regression.search;
 
+import java.io.IOException;
+import java.util.Map;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -9,6 +12,7 @@ import org.testng.annotations.Test;
 import com.flipkart.pages.*;
 import com.flipkart.utils.BaseTest;
 import com.flipkart.utils.CSVUtil;
+import com.flipkart.utils.GetScreenShot;
 import com.flipkart.utils.Logs;
 
 public class RegFlipkartSearchTest extends BaseTest {
@@ -26,12 +30,22 @@ public class RegFlipkartSearchTest extends BaseTest {
 	}
 	
 	@Test(priority=1)
-	public void searchItem(){
-		homePage.clickCloseButton();
-		Logs.info("uigyiguiguu9");
-		searchResultPage = homePage.searchProductOrBrand("iPhones");
-		searchResultPage.clickSortPriceLowToHighLink();
-		CSVUtil.writeDataLineByLine(CSV_FILE_PATH, searchResultPage.getItemDetails(maxPrice, storage));
+	public void searchItem() throws IOException{
+		try {
+			homePage.clickCloseButton();
+			searchResultPage = homePage.searchProductOrBrand("iPhones");
+			searchResultPage.clickSortPriceLowToHighLink();
+			Map<String, String> map = searchResultPage.getItemDetails(maxPrice, storage);
+			if (!map.isEmpty()) {
+				CSVUtil.writeDataLineByLine(CSV_FILE_PATH, map);
+			} else {
+				GetScreenShot.capture(driver, "Failed to get the list of searched iPhones");
+			}
+		} catch (IOException e) {
+			GetScreenShot.capture(driver, "Failed to get the list of searched iPhones");
+			e.printStackTrace();
+		}
+		
 	}
 	
 	@AfterMethod
